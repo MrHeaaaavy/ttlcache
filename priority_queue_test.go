@@ -43,7 +43,7 @@ func TestPriorityQueueCheckOrder(t *testing.T) {
 	}
 	for i := 1; i <= 10; i++ {
 		item := queue.pop()
-		assert.Equal(t, item.key, fmt.Sprintf("key_%d", i), "error")
+		assert.Equal(t, item.Key, fmt.Sprintf("key_%d", i), "error")
 	}
 }
 
@@ -69,7 +69,7 @@ func TestPriorityQueueRemove(t *testing.T) {
 		if item == nil {
 			break
 		}
-		assert.NotEqual(t, itemRemove.key, item.key, "This element was not supose to be in the queue")
+		assert.NotEqual(t, itemRemove.Key, item.Key, "This element was not supose to be in the queue")
 	}
 
 	assert.Equal(t, queue.Len(), 0, "The queue is supose to be with 0 items")
@@ -81,9 +81,9 @@ func TestPriorityQueueUpdate(t *testing.T) {
 	queue.push(item)
 	assert.Equal(t, queue.Len(), 1, "The queue is supose to be with 1 item")
 
-	item.key = "newKey"
+	item.Key = "newKey"
 	queue.update(item)
 	newItem := queue.pop()
-	assert.Equal(t, newItem.key, "newKey", "The item key didn't change")
+	assert.Equal(t, newItem.Key, "newKey", "The item key didn't change")
 	assert.Equal(t, queue.Len(), 0, "The queue is supose to be with 0 items")
 }

@@ -1,6 +1,7 @@
 package ttlcache
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -151,6 +152,30 @@ func TestCacheSetWithTTLExistItem(t *testing.T) {
 	data, exists := cache.Get("key")
 	assert.Equal(t, exists, true, "Expected 'key' to exist")
 	assert.Equal(t, data.(string), "value2", "Expected 'data' to have value 'value2'")
+}
+
+func TestCacheItemsCount(t *testing.T) {
+	expectedCount := 100
+	cache := NewCache()
+	for n := 0; n < expectedCount; n++ {
+		cache.Set(string(n), "value")
+	}
+	assert.Equal(t, len(cache.Items()), expectedCount, "Expected count 100")
+}
+
+func TestCacheItems(t *testing.T) {
+	cache := NewCache()
+	cache.Set("key1", "value1")
+	items := cache.Items()
+	item, exists := items["key1"]
+	if !exists {
+		t.Error("Item not found in the cache")
+	}
+	json, err := json.Marshal(item)
+	if err != nil {
+		t.Error("Cannot marshal items of the cache")
+	}
+	assert.Equal(t, `{"Key":"key1","Data":"value1","Ttl":0,"ExpireAt":"0001-01-01T00:00:00Z","QueueIndex":0}`, string(json), "Data error")
 }
 
 func BenchmarkCacheSetWithoutTTL(b *testing.B) {

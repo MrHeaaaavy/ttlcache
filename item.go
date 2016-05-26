@@ -12,28 +12,28 @@ const (
 
 func newItem(key string, data interface{}, ttl time.Duration) *item {
 	item := &item{
-		data: data,
-		ttl:  ttl,
-		key:  key,
+		Data: data,
+		Ttl:  ttl,
+		Key:  key,
 	}
 	item.touch()
 	return item
 }
 
 type item struct {
-	key        string
-	data       interface{}
-	ttl        time.Duration
-	expireAt   time.Time
-	mutex      sync.Mutex
-	queueIndex int
+	Key        string
+	Data       interface{}
+	Ttl        time.Duration
+	ExpireAt   time.Time
+	mutex      sync.Mutex `json:"-"`
+	QueueIndex int
 }
 
 // Reset the item expiration time
 func (item *item) touch() {
 	item.mutex.Lock()
-	if item.ttl > 0 {
-		item.expireAt = time.Now().Add(item.ttl)
+	if item.Ttl > 0 {
+		item.ExpireAt = time.Now().Add(item.Ttl)
 	}
 	item.mutex.Unlock()
 }
@@ -41,11 +41,11 @@ func (item *item) touch() {
 // Verify if the item is expired
 func (item *item) expired() bool {
 	item.mutex.Lock()
-	if item.ttl <= 0 {
+	if item.Ttl <= 0 {
 		item.mutex.Unlock()
 		return false
 	}
-	expired := item.expireAt.Before(time.Now())
+	expired := item.ExpireAt.Before(time.Now())
 	item.mutex.Unlock()
 	return expired
 }

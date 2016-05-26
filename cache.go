@@ -33,9 +33,9 @@ func (cache *Cache) getItem(key string) (*item, bool) {
 		return nil, false
 	}
 
-	if item.ttl >= 0 && (item.ttl > 0 || cache.ttl > 0) {
-		if cache.ttl > 0 && item.ttl == 0 {
-			item.ttl = cache.ttl
+	if item.Ttl >= 0 && (item.Ttl > 0 || cache.ttl > 0) {
+		if cache.ttl > 0 && item.Ttl == 0 {
+			item.Ttl = cache.ttl
 		}
 
 		item.touch()
@@ -52,10 +52,10 @@ func (cache *Cache) startExpirationProcessing() {
 		var sleepTime time.Duration
 		cache.mutex.Lock()
 		if cache.priorityQueue.Len() > 0 {
-			if cache.ttl > 0 && time.Now().Add(cache.ttl).Before(cache.priorityQueue.items[0].expireAt) {
+			if cache.ttl > 0 && time.Now().Add(cache.ttl).Before(cache.priorityQueue.items[0].ExpireAt) {
 				sleepTime = cache.ttl
 			} else {
-				sleepTime = cache.priorityQueue.items[0].expireAt.Sub(time.Now())
+				sleepTime = cache.priorityQueue.items[0].ExpireAt.Sub(time.Now())
 			}
 		} else if cache.ttl > 0 {
 			sleepTime = cache.ttl
@@ -81,7 +81,7 @@ func (cache *Cache) startExpirationProcessing() {
 			}
 
 			if cache.checkExpireCallback != nil {
-				if !cache.checkExpireCallback(item.key, item.data) {
+				if !cache.checkExpireCallback(item.Key, item.Data) {
 					item.touch()
 					cache.priorityQueue.update(item)
 					cache.mutex.Unlock()
@@ -90,11 +90,11 @@ func (cache *Cache) startExpirationProcessing() {
 			}
 
 			cache.priorityQueue.remove(item)
-			delete(cache.items, item.key)
+			delete(cache.items, item.Key)
 			cache.mutex.Unlock()
 
 			if cache.expireCallback != nil {
-				cache.expireCallback(item.key, item.data)
+				cache.expireCallback(item.Key, item.Data)
 			}
 		case <-cache.expirationNotification:
 			continue
@@ -103,7 +103,7 @@ func (cache *Cache) startExpirationProcessing() {
 }
 
 func (cache *Cache) expirationNotificationTrigger(item *item) {
-	if cache.expirationTime.After(time.Now().Add(item.ttl)) {
+	if cache.expirationTime.After(time.Now().Add(item.Ttl)) {
 		cache.expirationNotification <- true
 	}
 }
@@ -119,16 +119,16 @@ func (cache *Cache) SetWithTTL(key string, data interface{}, ttl time.Duration) 
 	cache.mutex.Lock()
 
 	if exists {
-		item.data = data
-		item.ttl = ttl
+		item.Data = data
+		item.Ttl = ttl
 	} else {
 		item = newItem(key, data, ttl)
 		cache.items[key] = item
 	}
 
-	if item.ttl >= 0 && (item.ttl > 0 || cache.ttl > 0) {
-		if cache.ttl > 0 && item.ttl == 0 {
-			item.ttl = cache.ttl
+	if item.Ttl >= 0 && (item.Ttl > 0 || cache.ttl > 0) {
+		if cache.ttl > 0 && item.Ttl == 0 {
+			item.Ttl = cache.ttl
 		}
 
 		item.touch()
@@ -151,7 +151,7 @@ func (cache *Cache) SetWithTTL(key string, data interface{}, ttl time.Duration) 
 func (cache *Cache) Get(key string) (interface{}, bool) {
 	item, exists := cache.getItem(key)
 	if exists {
-		return item.data, true
+		return item.Data, true
 	}
 	return nil, false
 }
@@ -163,7 +163,7 @@ func (cache *Cache) Remove(key string) bool {
 		cache.mutex.Unlock()
 		return false
 	}
-	delete(cache.items, object.key)
+	delete(cache.items, object.Key)
 	cache.priorityQueue.remove(object)
 	cache.mutex.Unlock()
 
@@ -176,6 +176,11 @@ func (cache *Cache) Count() int {
 	length := len(cache.items)
 	cache.mutex.Unlock()
 	return length
+}
+
+// Items returns all of the items in the cache
+func (cache *Cache) Items() map[string]*item {
+	return cache.items
 }
 
 func (cache *Cache) SetTTL(ttl time.Duration) {
@@ -205,6 +210,18 @@ func (cache *Cache) SetNewItemCallback(callback expireCallback) {
 func NewCache() *Cache {
 	cache := &Cache{
 		items:                  make(map[string]*item),
+		priorityQueue:          newPriorityQueue(),
+		expirationNotification: make(chan bool, 1),
+		expirationTime:         time.Now(),
+	}
+	go cache.startExpirationProcessing()
+	return cache
+}
+
+// NewCacheFrom is a helper to create instance of the Cache struct with initialise data
+func NewCacheFrom(items map[string]*item) *Cache {
+	cache := &Cache{
+		items:                  items,
 		priorityQueue:          newPriorityQueue(),
 		expirationNotification: make(chan bool, 1),
 		expirationTime:         time.Now(),

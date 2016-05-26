@@ -16,10 +16,10 @@ func TestItemExpired(t *testing.T) {
 
 func TestItemTouch(t *testing.T) {
 	item := newItem("key", "value", (time.Duration(100) * time.Millisecond))
-	oldExpireAt := item.expireAt
+	oldExpireAt := item.ExpireAt
 	<-time.After(50 * time.Millisecond)
 	item.touch()
-	assert.NotEqual(t, oldExpireAt, item.expireAt, "Expected dates to be different")
+	assert.NotEqual(t, oldExpireAt, item.ExpireAt, "Expected dates to be different")
 	<-time.After(150 * time.Millisecond)
 	assert.Equal(t, item.expired(), true, "Expected item to be expired")
 	item.touch()
