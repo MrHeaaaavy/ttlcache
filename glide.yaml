@@ -1,0 +1,5 @@
+package: github.com/codebear4/ttlcache
+import:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
