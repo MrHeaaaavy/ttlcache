@@ -10,8 +10,8 @@ const (
 	ItemExpireWithGlobalTTL time.Duration = 0
 )
 
-func newItem(key string, data interface{}, ttl time.Duration) *item {
-	item := &item{
+func newItem(key string, data interface{}, ttl time.Duration) *Item {
+	item := &Item{
 		Data: data,
 		Ttl:  ttl,
 		Key:  key,
@@ -20,7 +20,7 @@ func newItem(key string, data interface{}, ttl time.Duration) *item {
 	return item
 }
 
-type item struct {
+type Item struct {
 	Key        string
 	Data       interface{}
 	Ttl        time.Duration
@@ -30,7 +30,7 @@ type item struct {
 }
 
 // Reset the item expiration time
-func (item *item) touch() {
+func (item *Item) touch() {
 	item.mutex.Lock()
 	if item.Ttl > 0 {
 		item.ExpireAt = time.Now().Add(item.Ttl)
@@ -39,7 +39,7 @@ func (item *item) touch() {
 }
 
 // Verify if the item is expired
-func (item *item) expired() bool {
+func (item *Item) expired() bool {
 	item.mutex.Lock()
 	if item.Ttl <= 0 {
 		item.mutex.Unlock()

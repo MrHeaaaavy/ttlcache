@@ -15,7 +15,7 @@ type expireCallback func(key string, value interface{})
 type Cache struct {
 	mutex                  sync.Mutex
 	ttl                    time.Duration
-	items                  map[string]*item
+	items                  map[string]*Item
 	expireCallback         expireCallback
 	checkExpireCallback    checkExpireCallback
 	newItemCallback        expireCallback
@@ -24,7 +24,7 @@ type Cache struct {
 	expirationTime         time.Time
 }
 
-func (cache *Cache) getItem(key string) (*item, bool) {
+func (cache *Cache) getItem(key string) (*Item, bool) {
 	cache.mutex.Lock()
 
 	item, exists := cache.items[key]
@@ -102,7 +102,7 @@ func (cache *Cache) startExpirationProcessing() {
 	}
 }
 
-func (cache *Cache) expirationNotificationTrigger(item *item) {
+func (cache *Cache) expirationNotificationTrigger(item *Item) {
 	if cache.expirationTime.After(time.Now().Add(item.Ttl)) {
 		cache.expirationNotification <- true
 	}
@@ -179,7 +179,7 @@ func (cache *Cache) Count() int {
 }
 
 // Items returns all of the items in the cache
-func (cache *Cache) Items() map[string]*item {
+func (cache *Cache) Items() map[string]*Item {
 	return cache.items
 }
 
@@ -209,7 +209,7 @@ func (cache *Cache) SetNewItemCallback(callback expireCallback) {
 // NewCache is a helper to create instance of the Cache struct
 func NewCache() *Cache {
 	cache := &Cache{
-		items:                  make(map[string]*item),
+		items:                  make(map[string]*Item),
 		priorityQueue:          newPriorityQueue(),
 		expirationNotification: make(chan bool, 1),
 		expirationTime:         time.Now(),
@@ -219,7 +219,7 @@ func NewCache() *Cache {
 }
 
 // NewCacheFrom is a helper to create instance of the Cache struct with initialise data
-func NewCacheFrom(items map[string]*item) *Cache {
+func NewCacheFrom(items map[string]*Item) *Cache {
 	cache := &Cache{
 		items:                  items,
 		priorityQueue:          newPriorityQueue(),

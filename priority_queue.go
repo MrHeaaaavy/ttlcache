@@ -13,25 +13,25 @@ func newPriorityQueue() *priorityQueue {
 
 type priorityQueue struct {
 	mutex sync.Mutex
-	items []*item
+	items []*Item
 }
 
-func (pq *priorityQueue) update(item *item) {
+func (pq *priorityQueue) update(item *Item) {
 	heap.Fix(pq, item.QueueIndex)
 }
 
-func (pq *priorityQueue) push(item *item) {
+func (pq *priorityQueue) push(item *Item) {
 	heap.Push(pq, item)
 }
 
-func (pq *priorityQueue) pop() *item {
+func (pq *priorityQueue) pop() *Item {
 	if pq.Len() == 0 {
 		return nil
 	}
-	return heap.Pop(pq).(*item)
+	return heap.Pop(pq).(*Item)
 }
 
-func (pq *priorityQueue) remove(item *item) {
+func (pq *priorityQueue) remove(item *Item) {
 	heap.Remove(pq, item.QueueIndex)
 }
 
@@ -59,7 +59,7 @@ func (pq priorityQueue) Swap(i, j int) {
 
 func (pq *priorityQueue) Push(x interface{}) {
 	pq.mutex.Lock()
-	item := x.(*item)
+	item := x.(*Item)
 	item.QueueIndex = len(pq.items)
 	pq.items = append(pq.items, item)
 	pq.mutex.Unlock()

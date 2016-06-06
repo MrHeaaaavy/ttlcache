@@ -23,17 +23,17 @@ func TestPriorityQueuePop(t *testing.T) {
 	}
 	for i := 0; i < 5; i++ {
 		item := queue.pop()
-		assert.Equal(t, fmt.Sprintf("%T", item), "*ttlcache.item", "Expected 'item' to be a '*ttlcache.item'")
+		assert.Equal(t, fmt.Sprintf("%T", item), "*ttlcache.Item", "Expected 'item' to be a '*ttlcache.Item'")
 	}
 	assert.Equal(t, queue.Len(), 5, "Expected queue to have 5 elements")
 	for i := 0; i < 5; i++ {
 		item := queue.pop()
-		assert.Equal(t, fmt.Sprintf("%T", item), "*ttlcache.item", "Expected 'item' to be a '*ttlcache.item'")
+		assert.Equal(t, fmt.Sprintf("%T", item), "*ttlcache.Item", "Expected 'item' to be a '*ttlcache.Item'")
 	}
 	assert.Equal(t, queue.Len(), 0, "Expected queue to have 0 elements")
 
 	item := queue.pop()
-	assert.Nil(t, item, "*ttlcache.item", "Expected 'item' to be nil")
+	assert.Nil(t, item, "*ttlcache.Item", "Expected 'item' to be nil")
 }
 
 func TestPriorityQueueCheckOrder(t *testing.T) {
@@ -49,8 +49,8 @@ func TestPriorityQueueCheckOrder(t *testing.T) {
 
 func TestPriorityQueueRemove(t *testing.T) {
 	queue := newPriorityQueue()
-	items := make(map[string]*item)
-	var itemRemove *item
+	items := make(map[string]*Item)
+	var itemRemove *Item
 	for i := 0; i < 5; i++ {
 		key := fmt.Sprintf("key_%d", i)
 		items[key] = newItem(key, "data", time.Duration(i)*time.Second)
